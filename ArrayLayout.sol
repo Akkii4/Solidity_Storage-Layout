@@ -5,8 +5,8 @@ pragma solidity ^0.8.0;
 contract ArrayLayout {
     // State variables
     uint256[5] fixedArray = [13, 23, 33, 43, 53]; // slot 0-4
-    uint256[] bigDynamicArray; //slot 5 (stores length of this dynamic array)
-    uint8[] smallDynamicArray; // slot 6
+    uint256[] bigDynamicArray; // slot 5 (stores length of this dynamic array at this slot)
+    uint8[] smallDynamicArray; // slot 6 (stores length of this dynamic array at this slot)
 
     function set(uint256[] calldata _dynamicArray) external {
         for (uint i = 0; i < _dynamicArray.length; i++) {
