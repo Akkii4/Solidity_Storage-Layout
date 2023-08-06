@@ -20,9 +20,17 @@ contract DynamicMemory {
         }
     }
 
+    /**
+     * Memory Expansion costs : EVM doesn't allocate the entire memory upfront.
+     *  It expands as needed, and cost gas only for the expansion.
+     * memory_size_word = (memory_byte_size + 31) / 32
+     * memory_cost = (memory_size_word ** 2) / 512 + (3 * memory_size_word)
+     * memory_expansion_cost = new_memory_cost - last_memory_cost
+     */
     function exceedMemoryGasLimit() public pure returns (uint256 storedVal) {
         assembly {
-            storedVal := mload(mul(110000, 0x20))
+            storedVal := mload(mul(125000, 0x20)) // gives Out of gas error once we hit 30MN Ethereum Block gas limit
         }
+        // for memory_size_word ~= 123200 bytes, 30MN gas limit will reach
     }
 }
