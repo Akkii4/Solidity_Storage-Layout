@@ -7,7 +7,7 @@ contract SimpleStorage {
     uint256 public x; // slot 0
     address public user; // slot 1
     uint64 public y; // slot 1
-    uint128 public z; // slot 1
+    uint128 public z; // slot 2
 
     // Set state variables
     function set(uint256 _x, address _user, uint64 _y, uint128 _z) external {
