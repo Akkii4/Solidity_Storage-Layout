@@ -20,8 +20,8 @@ contract AccessPackedStorage {
         }
     }
 
-    // example showing extracting value stored at variable j
-    function accessValFromPackedSlot()
+    // example showing reading value stored at variable j
+    function readValFromPackedSlot()
         external
         view
         returns (bytes32 valStartingAtOffset, bytes32 extractedVal)
@@ -36,9 +36,33 @@ contract AccessPackedStorage {
             valStartingAtOffset := shr(mul(j.offset, 8), storedValAtSlot)
 
             // to extract only the value of the desired variable
-            // bitwise and operation with same number of 1 bits(f in hex) as the variable length of variable
+            // Bitmasking : bitwise and operation with same number of 1 bits(f in hex) as the variable length of variable
             // 0x0000000000000000000000000000000000000000000000000000000000000001
             extractedVal := and(0xff, valStartingAtOffset)
+        }
+    }
+
+    // example showing changing/writing value stored at variable j
+    function writeValInPackedSlot(uint8 _newJ) external {
+        assembly {
+            // already stored complete value at the slot where j is stored(slot 1)
+            // 0x0000030100000000000000080000000000000000000000000000000000000014
+            let storedValAtSlot := sload(j.slot)
+
+            // clear and set to 0 the variable 'j' bits stored the slot
+            // as j is only 1 byte long thus need 2 hex char to be reset
+            //  resetVal : 0x0000030000000000000000080000000000000000000000000000000000000014
+            let resetVal := and(
+                0xffffff00ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+                storedValAtSlot
+            )
+
+            let allignedNewVal := shl(mul(j.offset, 8), _newJ)
+
+            // combining the reset value with the new value
+            let newVal := or(resetVal, allignedNewVal)
+
+            sstore(j.slot, newVal)
         }
     }
 }
