@@ -9,7 +9,7 @@ contract SolidityMemoryLayout {
         - Next 32 bytes (0x40 to 0x5f) also known as "free memory pointer" keeps track of next available location in memory where new data can be stored
         - Next 32 bytes (0x60 to 0x7f) is a zero slot that is used as starting point for dynamic memory arrays that is initialized with 0 and should never be written to.
     */
-    function freeMemory() external {
+    function freeMemory() external pure {
         assembly {
             // fetches the next free available slots in the memory
             let freeMemPtr := mload(0x40)
@@ -31,16 +31,13 @@ contract SolidityMemoryLayout {
                 let previousFreeMemPtr := mload(0x40)
                 mstore(0x40, add(previousFreeMemPtr, length))
             }
-
-            // msize : returns the largest accessed memory index
-            // msize does not guarantee unused memory until the free pointer is updated
         }
     }
 
     // if at any point in code execution free mem ptr is mishandled it can cause overwrite
     function breakFreeMemoryPointer(
         uint256[1] memory foo
-    ) external view returns (uint256) {
+    ) external pure returns (uint256) {
         // initially foo element is stored at 0x80
         assembly {
             mstore(0x40, 0x80) // mishandling free mem ptr
@@ -49,10 +46,10 @@ contract SolidityMemoryLayout {
         return foo[0];
     }
 
-    uint8[] foo = [1, 2, 3, 4, 5, 6]; // here array element are packed into 1 (32 bytes) storage slot
+    uint8[] smallStorage = [1, 2, 3, 4, 5, 6]; // here array element are packed into 1 (32 bytes) storage slot
 
     function unpacked() external view {
-        uint8[] memory bar = foo; // loading from storage to memory , automatically unpacks the elements
+        uint8[] memory smallMem = smallStorage; // loading from storage to memory , automatically unpacks the elements
         assembly {
             pop(mload(0x80)) //  0x0000...000006 (length of array)
             pop(mload(0xa0)) //   0x0000...000001
